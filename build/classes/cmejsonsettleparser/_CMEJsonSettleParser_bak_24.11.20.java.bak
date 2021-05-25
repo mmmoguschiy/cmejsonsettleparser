@@ -1,0 +1,755 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cmejsonsettleparser;
+
+import java.io.FileWriter;
+import static java.lang.System.out;
+import java.io.IOException;
+import java.io.InputStream;
+import static java.lang.System.out;
+import java.util.ArrayList;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonArray;
+import javax.json.Json;
+import javax.json.JsonString;
+import javax.json.JsonException;
+
+import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ *
+ * @author dg
+ */
+public class CMEJsonSettleParser {
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws IOException {
+        // TODO code application logic here
+        
+        
+        String month = "09";
+        String day = "10";
+        String[] year = {"2020"};
+        //String tdate = "05/24/2019";
+        String tdate = month + "/" + day + "/" + year[0];
+        String cletter = "U";//K M N U
+        String oil_letter = "U";//K
+        String com_letter = "U";//K
+        String sipi_eom_letter = "U";//J to 30 april
+        String sipi_letter = "U";//M
+        String rate_letter = "J";
+        
+        class yl
+        {
+            String year;
+            char[] letters;
+            
+            public yl(String y, char[] l)
+            {
+                this.year = y;
+                this.letters = l;
+            }
+        }
+        
+        char[] cl1 = {'V', 'X', 'Z'};
+        char[] cl2 = {'F','G','H','J','K'};
+        yl[] cletters = new yl[2];
+        cletters[0] = new yl("2020",cl1);
+        cletters[1] = new yl("2021",cl2);
+        
+        char[] btc1 = {'V', 'Z'};
+        char[] btc2 = {'Z'};
+        yl[] btcletters = new yl[2];
+        btcletters[0] = new yl("2020",btc1);
+        btcletters[1] = new yl("2021",btc2);
+        
+        //char[] ol1 = {'U', 'V', 'X','Z'};
+        //char[] ol2 = {'F','G','H','J','K','M','N', 'Q', 'U', 'V', 'X','Z'};
+        //yl[] oil_letters = new yl[2];
+        //oil_letters[0] = new yl("2019",ol1);
+        //oil_letters[1] = new yl("2020",ol2);
+        char[] ol1 = {'V', 'X','Z'};
+        char[] ol2 = {'F','G','H','J','K','M','N', 'Q', 'U', 'V', 'X','Z'};
+        char[] ol3 = {'F','G','H','J','K','M'};
+        yl[] oil_letters = new yl[11];
+        oil_letters[0] = new yl("2020",ol1);
+        oil_letters[1] = new yl("2021",ol2);
+        oil_letters[2] = new yl("2022",ol2);
+        oil_letters[3] = new yl("2023",ol2);
+        oil_letters[4] = new yl("2024",ol2);
+        oil_letters[5] = new yl("2025",ol2);
+        oil_letters[6] = new yl("2026",ol2);
+        oil_letters[7] = new yl("2027",ol2);
+        oil_letters[8] = new yl("2028",ol2);
+        oil_letters[9] = new yl("2029",ol2);
+        oil_letters[10] = new yl("2030",ol3);
+        
+        //char[] coml1 = {'U', 'V', 'X','Z'};
+        //char[] coml2 = {'F','G','H','J','K','M','N', 'Q', 'U', 'V', 'X','Z'};
+        //yl[] com_letters = new yl[2];
+        //com_letters[0] = new yl("2019",coml1);
+        //com_letters[1] = new yl("2020",coml2);
+        
+        char[] coml1 = {'V', 'X','Z'};
+        char[] coml2 = {'F','G','H','J','K','M','N', 'Q', 'U','V','X','Z'};
+        char[] coml3 = {'F','G','M','Z'};
+        char[] coml4 = {'M','Z'};
+        yl[] com_letters = new yl[6];
+        com_letters[0] = new yl("2020",coml1);
+        com_letters[1] = new yl("2021",coml2);
+        com_letters[2] = new yl("2022",coml3);
+        com_letters[3] = new yl("2023",coml4);
+        com_letters[4] = new yl("2024",coml4);
+        com_letters[5] = new yl("2025",coml4);
+        
+        char[] plat1 = {'V'};
+        char[] plat2 = {'F','J'};
+        yl[] plat_letters = new yl[2];
+        plat_letters[0] = new yl("2020",plat1);
+        plat_letters[1] = new yl("2021",plat2);
+        
+        char[] pall1 = {'Z'};
+        char[] pall2 = {'F','H','M','U'};
+        yl[] pall_letters = new yl[2];
+        pall_letters[0] = new yl("2020",pall1);
+        pall_letters[1] = new yl("2021",pall2);
+        
+        char[] sel1 = {'V'};
+        yl[] sipi_eom_letters = new yl[1];
+        sipi_eom_letters[0] = new yl("2020",sel1);
+       
+        char[] sl1 = {'M','U','Z'};
+        char[] sl2 = {'H'};
+        yl[] sipi_letters = new yl[2];
+        sipi_letters[0] = new yl("2020",sl1);
+        sipi_letters[1] = new yl("2021",sl2);
+
+        //char[] cletters = {'M', 'N', 'Q', 'U', 'Z'};
+        //char[] oil_letters = {'M', 'N', 'Q', 'U', 'V', 'X','Z'};
+        //char[] com_letters = {'M', 'N', 'Q', 'U', 'V', 'X','Z'};
+        //char[] sipi_eom_letters = {'K', 'M', 'N', 'Q', 'U'};
+        //char[] sipi_letters = {'M', 'U', 'Z'};
+        
+        int wedweek_num = 2;
+        int week_num = 2;
+        
+        String euro_week_num = String.valueOf(8117+week_num-1);
+        String gbp_week_num = String.valueOf(8099+week_num-1);
+        String jpy_week_num = String.valueOf(8123+week_num-1);
+        String aud_week_num = String.valueOf(8093+week_num-1);
+        String cad_week_num = String.valueOf(8105+week_num-1);
+        String chf_week_num = String.valueOf(8111+week_num-1);
+        String gold_week_num = String.valueOf(7488+week_num-1);
+        String usoil_week_num = String.valueOf(7503+week_num-1);
+        String sipi_week_num = String.valueOf(2915+week_num-1);
+        
+        String euro_wedweek_num = String.valueOf(8440+wedweek_num-1);
+        String gbp_wedweek_num = String.valueOf(8420+wedweek_num-1);
+        String jpy_wedweek_num = String.valueOf(8450+wedweek_num-1);
+        String aud_wedweek_num = String.valueOf(8410+wedweek_num-1);
+        String cad_wedweek_num = String.valueOf(8430+wedweek_num-1);
+        String sipi_wedweek_num = String.valueOf(8227+wedweek_num-1);
+        
+        /*
+        for (char s : cletters)
+        {
+            String clet = String.valueOf(s);
+            doit("euro",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8116/OOF?monthYear=EUU"+clet+"19&strategy=DEFAULT&optionProductId=8116&optionExpiration=8116-"+clet+"9&tradeDate="+tdate);
+            doit("gbp",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8098/OOF?monthYear=GBU"+clet+"19&strategy=DEFAULT&optionProductId=8098&optionExpiration=8098-"+clet+"9&tradeDate="+tdate);
+            doit("jpy",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8122/OOF?monthYear=JPU"+clet+"19&strategy=DEFAULT&optionProductId=8122&optionExpiration=8122-"+clet+"9&tradeDate="+tdate);
+            doit("aud",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8092/OOF?monthYear=ADU"+clet+"19&strategy=DEFAULT&optionProductId=8092&optionExpiration=8092-"+clet+"9&tradeDate="+tdate);
+            doit("cad",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8104/OOF?monthYear=CAU"+clet+"19&strategy=DEFAULT&optionProductId=8104&optionExpiration=8104-"+clet+"9&tradeDate="+tdate);
+            doit("chf",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8110/OOF?monthYear=CHU"+clet+"19&strategy=DEFAULT&optionProductId=8110&optionExpiration=8110-"+clet+"9&tradeDate="+tdate);
+        }
+        
+        for (char s : oil_letters)
+        {
+            String clet = String.valueOf(s);
+            doit("usoil",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/190/OOF?monthYear=LO"+clet+"19&strategy=DEFAULT&optionProductId=190&optionExpiration=190-"+clet+"9&tradeDate="+tdate);
+        }
+        
+        for (char s : com_letters)
+        {
+            String clet = String.valueOf(s);
+            doit("gold",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/192/OOF?monthYear=OG"+clet+"19&strategy=DEFAULT&optionProductId=192&optionExpiration=192-"+clet+"9&tradeDate="+tdate);
+        }
+        
+        for (char s : sipi_letters)
+        {
+            String clet = String.valueOf(s);
+            doit("sipi",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/138/OOF?monthYear=EZ"+clet+"19&strategy=DEFAULT&optionProductId=138&optionExpiration=138-"+clet+"9&tradeDate="+tdate);
+        }
+        
+        for (char s : sipi_eom_letters)
+        {
+            String clet = String.valueOf(s);
+            doit("sipi_eom",clet,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//136/OOF?monthYear=EW"+clet+"19&strategy=DEFAULT&optionProductId=136&optionExpiration=136-"+clet+"9&tradeDate="+tdate);
+        }
+        */
+        
+        for (yl c : cletters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("euro",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8116/OOF?monthYear=EUU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8116&optionExpiration=8116-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("gbp",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8098/OOF?monthYear=GBU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8098&optionExpiration=8098-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("jpy",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8122/OOF?monthYear=JPU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8122&optionExpiration=8122-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("aud",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8092/OOF?monthYear=ADU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8092&optionExpiration=8092-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("cad",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8104/OOF?monthYear=CAU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8104&optionExpiration=8104-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("chf",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8110/OOF?monthYear=CHU"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8110&optionExpiration=8110-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        for (yl c : btcletters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                //                      https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8875/OOF?monthYear=OBCK20&                    strategy=DEFAULT&optionProductId=8875&optionExpiration=8875-K0&tradeDate=04%2F29%2F2020&pageSize=500&_=1588218713280
+                doit("btc",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8875/OOF?monthYear=OBC"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=8875&optionExpiration=8875-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+
+        
+        for (yl c : oil_letters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("usoil",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/190/OOF?monthYear=LO"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=190&optionExpiration=190-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("gas",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//1352/OOF?monthYear=LN"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=1352&optionExpiration=1352-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        for (yl c : com_letters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("gold",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/192/OOF?monthYear=OG"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=192&optionExpiration=192-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        for (yl c : plat_letters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("plat",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2910/OOF?monthYear=PO"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=2910&optionExpiration=2910-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+                doit("pall",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//5380/OOF?monthYear=PAO"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=5380&optionExpiration=5380-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        for (yl c : sipi_letters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("sipi",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/138/OOF?monthYear=EZ"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=138&optionExpiration=138-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        for (yl c : sipi_eom_letters)
+        {
+            String tp = year[0] + "-" + month + "-" + day;
+            String y = c.year;
+            for (char s : c.letters)
+            {
+                String clet = String.valueOf(s);
+                doit("sipi_eom",clet,y,tp,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//136/OOF?monthYear=EW"+clet+y.substring(2)+"&strategy=DEFAULT&optionProductId=136&optionExpiration=136-"+clet+y.charAt(3)+"&tradeDate="+tdate);
+            }
+        }
+        
+        
+        /*
+        //doit("euro",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8116/OOF?monthYear=EUU"+cletter+"19&strategy=DEFAULT&optionProductId=8116&optionExpiration=8116-"+cletter+"9&tradeDate="+tdate);
+        
+        //doit("euro_wedweek",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+euro_wedweek_num+"/OOF?monthYear=WE"+wedweek_num+"J19&strategy=DEFAULT&optionProductId=8440&optionExpiration="+euro_wedweek_num+"-J9&tradeDate="+tdate);
+        //doit("euro_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+euro_week_num+"/OOF?monthYear="+week_num+"EUJ19&strategy=DEFAULT&optionProductId=8117&optionExpiration="+euro_week_num+"-J9&tradeDate="+tdate);
+       
+        //doit("gbp",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8098/OOF?monthYear=GBU"+cletter+"19&strategy=DEFAULT&optionProductId=8098&optionExpiration=8098-"+cletter+"9&tradeDate="+tdate);
+        //doit("gbp_wedweek",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+gbp_wedweek_num+"/OOF?monthYear=WG"+wedweek_num+"J19&strategy=DEFAULT&optionProductId=8420&optionExpiration="+gbp_wedweek_num+"-J9&tradeDate="+tdate);
+        //doit("gbp_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+gbp_week_num+"/OOF?monthYear="+week_num+"BPJ19&strategy=DEFAULT&optionProductId=8099&optionExpiration="+gbp_week_num+"-J9&tradeDate="+tdate);
+    
+        //doit("jpy",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8122/OOF?monthYear=JPU"+cletter+"19&strategy=DEFAULT&optionProductId=8122&optionExpiration=8122-"+cletter+"9&tradeDate="+tdate);
+        doit("jpy_wedweek",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+jpy_wedweek_num+"/OOF?monthYear=WJ"+wedweek_num+"J19&strategy=DEFAULT&optionProductId=8450&optionExpiration="+jpy_wedweek_num+"-J9&tradeDate="+tdate);
+        doit("jpy_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+jpy_week_num+"/OOF?monthYear="+week_num+"JYJ19&strategy=DEFAULT&optionProductId=8123&optionExpiration="+jpy_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("aud",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8092/OOF?monthYear=ADU"+cletter+"19&strategy=DEFAULT&optionProductId=8092&optionExpiration=8092-"+cletter+"9&tradeDate="+tdate);
+        doit("aud_wedweek",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+aud_wedweek_num+"/OOF?monthYear=WA"+wedweek_num+"J19&strategy=DEFAULT&optionProductId=8410&optionExpiration="+aud_wedweek_num+"-J9&tradeDate="+tdate);
+        doit("aud_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+aud_week_num+"/OOF?monthYear="+week_num+"ADJ19&strategy=DEFAULT&optionProductId=8093&optionExpiration="+aud_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("cad",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8104/OOF?monthYear=CAU"+cletter+"19&strategy=DEFAULT&optionProductId=8104&optionExpiration=8104-"+cletter+"9&tradeDate="+tdate);
+        doit("cad_wedweek",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+cad_wedweek_num+"/OOF?monthYear=WD"+wedweek_num+"J19&strategy=DEFAULT&optionProductId=8430&optionExpiration="+cad_wedweek_num+"-J9&tradeDate="+tdate);
+        doit("cad_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+cad_week_num+"/OOF?monthYear="+week_num+"CDJ19&strategy=DEFAULT&optionProductId=8105&optionExpiration="+cad_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("chf",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8110/OOF?monthYear=CHU"+cletter+"19&strategy=DEFAULT&optionProductId=8110&optionExpiration=8110-"+cletter+"9&tradeDate="+tdate);
+        doit("chf_week",cletter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+chf_week_num+"/OOF?monthYear="+week_num+"SFJ19&strategy=DEFAULT&optionProductId=8111&optionExpiration="+chf_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("gold",com_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/192/OOF?monthYear=OG"+com_letter+"19&strategy=DEFAULT&optionProductId=192&optionExpiration=192-"+com_letter+"9&tradeDate="+tdate);
+        doit("gold_week",com_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+gold_week_num+"/OOF?monthYear=OG"+week_num+"J19&strategy=DEFAULT&optionProductId=7488&optionExpiration="+gold_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("usoil",oil_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/190/OOF?monthYear=LO"+oil_letter+"19&strategy=DEFAULT&optionProductId=190&optionExpiration=190-"+oil_letter+"9&tradeDate="+tdate);
+        //doit("usoil_week",com_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+usoil_week_num+"/OOF?monthYear=LO"+week_num+"J19&strategy=DEFAULT&optionProductId=7503&optionExpiration="+usoil_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("sipi",sipi_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/138/OOF?monthYear=EZ"+sipi_letter+"19&strategy=DEFAULT&optionProductId=138&optionExpiration=138-"+sipi_letter+"9&tradeDate="+tdate);
+        //doit("sipi_eom",sipi_eom_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//136/OOF?monthYear=EW"+sipi_eom_letter+"19&strategy=DEFAULT&optionProductId=136&optionExpiration=136-"+sipi_eom_letter+"9&tradeDate="+tdate);
+        doit("sipi_monweek",sipi_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8295/OOF?monthYear=E4AJ19&strategy=DEFAULT&optionProductId=8292&optionExpiration=8295-J9&tradeDate="+tdate);
+        doit("sipi_wedweek",sipi_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+sipi_wedweek_num+"/OOF?monthYear=E1CJ19&strategy=DEFAULT&optionProductId=8227&optionExpiration="+sipi_wedweek_num+"-J9&tradeDate="+tdate);
+        doit("sipi_week",sipi_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+sipi_week_num+"/OOF?monthYear=EW"+week_num+"J19&strategy=DEFAULT&optionProductId=2915&optionExpiration="+sipi_week_num+"-J9&tradeDate="+tdate);
+        
+        //doit("intrate",rate_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/317/OOF?monthYear=TC"+rate_letter+"19&strategy=DEFAULT&optionProductId=317&optionExpiration=317-"+rate_letter+"9&tradeDate="+tdate);
+        //doit("intrate_week",rate_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlement6083/OOF?monthYear=TY3M18&strategy=DEFAULT&optionProductId=6081&optionExpiration=6083-M8&tradeDate="+tdate);
+        //doit("intrate_wedweek",rate_letter,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/8355/OOF?monthYear=WY2M18&strategy=DEFAULT&optionProductId=8354&optionExpiration=8355-M8&tradeDate="+tdate);
+        
+        */
+        
+        String tpw = year[0] + "-" + month + "-" + day;
+        String y = year[0];
+    /*    
+        //weeks
+        
+        //doit("euro_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8117"+"/OOF?monthYear="+"1"+"EUK20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8117"+"-K0&tradeDate="+tdate);
+        //doit("euro_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8119"+"/OOF?monthYear="+"3"+"EUK20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8119"+"-K0&tradeDate="+tdate);
+        //doit("euro_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8120"+"/OOF?monthYear="+"4"+"EUK20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8120"+"-K0&tradeDate="+tdate);
+        //doit("euro_week","5K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8121"+"/OOF?monthYear="+"5"+"EUK20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8121"+"-K0&tradeDate="+tdate);
+        //doit("euro_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8118"+"/OOF?monthYear="+"2"+"EUM20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8118"+"-M0&tradeDate="+tdate);
+        //doit("euro_week","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8119"+"/OOF?monthYear="+"3"+"EUM20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8119"+"-M0&tradeDate="+tdate);
+        //doit("euro_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8120"+"/OOF?monthYear="+"4"+"EUM20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8120"+"-M0&tradeDate="+tdate);
+        doit("euro_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8118"+"/OOF?monthYear="+"2"+"EUN20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8118"+"-N0&tradeDate="+tdate);
+        doit("euro_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8119"+"/OOF?monthYear="+"3"+"EUN20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8119"+"-N0&tradeDate="+tdate);
+        doit("euro_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8120"+"/OOF?monthYear="+"4"+"EUN20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8120"+"-N0&tradeDate="+tdate);
+        doit("euro_week","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8121"+"/OOF?monthYear="+"5"+"EUN20&strategy=DEFAULT&optionProductId=8117&optionExpiration="+"8121"+"-N0&tradeDate="+tdate);
+
+        //doit("gbp_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8099"+"/OOF?monthYear="+"1"+"BPK20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8099"+"-K0&tradeDate="+tdate);
+        //doit("gbp_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8101"+"/OOF?monthYear="+"3"+"BPK20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8101"+"-K0&tradeDate="+tdate);
+        //doit("gbp_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8102"+"/OOF?monthYear="+"4"+"BPK20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8102"+"-K0&tradeDate="+tdate);
+        //doit("gbp_week","5K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8103"+"/OOF?monthYear="+"5"+"BPK20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8103"+"-K0&tradeDate="+tdate);
+        //doit("gbp_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8100"+"/OOF?monthYear="+"2"+"BPM20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8100"+"-M0&tradeDate="+tdate);
+        //doit("gbp_week","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8101"+"/OOF?monthYear="+"3"+"BPM20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8101"+"-M0&tradeDate="+tdate);
+        //doit("gbp_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8102"+"/OOF?monthYear="+"4"+"BPM20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8102"+"-M0&tradeDate="+tdate);
+        doit("gbp_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8100"+"/OOF?monthYear="+"2"+"BPN20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8100"+"-N0&tradeDate="+tdate);
+        doit("gbp_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8101"+"/OOF?monthYear="+"3"+"BPN20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8101"+"-N0&tradeDate="+tdate);
+        doit("gbp_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8102"+"/OOF?monthYear="+"4"+"BPN20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8102"+"-N0&tradeDate="+tdate);
+        doit("gbp_week","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8103"+"/OOF?monthYear="+"5"+"BPN20&strategy=DEFAULT&optionProductId=8099&optionExpiration="+"8103"+"-N0&tradeDate="+tdate);
+        
+        //doit("aud_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8093"+"/OOF?monthYear="+"1"+"ADK20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8093"+"-K0&tradeDate="+tdate);
+        //doit("aud_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8095"+"/OOF?monthYear="+"3"+"ADK20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8095"+"-K0&tradeDate="+tdate);
+        //doit("aud_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8096"+"/OOF?monthYear="+"4"+"ADK20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8096"+"-K0&tradeDate="+tdate);
+        //doit("aud_week","5K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8097"+"/OOF?monthYear="+"5"+"ADK20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8097"+"-K0&tradeDate="+tdate);
+        //doit("aud_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8094"+"/OOF?monthYear="+"2"+"ADM20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8094"+"-M0&tradeDate="+tdate);
+        //doit("aud_week","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8095"+"/OOF?monthYear="+"3"+"ADM20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8095"+"-M0&tradeDate="+tdate);
+        //doit("aud_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8096"+"/OOF?monthYear="+"4"+"ADM20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8096"+"-M0&tradeDate="+tdate);
+        doit("aud_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8094"+"/OOF?monthYear="+"2"+"ADN20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8094"+"-N0&tradeDate="+tdate);
+        doit("aud_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8095"+"/OOF?monthYear="+"3"+"ADN20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8095"+"-N0&tradeDate="+tdate);
+        doit("aud_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8096"+"/OOF?monthYear="+"4"+"ADN20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8096"+"-N0&tradeDate="+tdate);
+        doit("aud_week","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8097"+"/OOF?monthYear="+"5"+"ADN20&strategy=DEFAULT&optionProductId=8093&optionExpiration="+"8097"+"-N0&tradeDate="+tdate);
+        
+        //doit("usoil_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7503"+"/OOF?monthYear=LO"+"1"+"K20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7503"+"-K0&tradeDate="+tdate);
+        //doit("usoil_week","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7504"+"/OOF?monthYear=LO"+"2"+"K20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7504"+"-K0&tradeDate="+tdate);
+        //doit("usoil_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7505"+"/OOF?monthYear=LO"+"3"+"K20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7505"+"-K0&tradeDate="+tdate);
+        //doit("usoil_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7506"+"/OOF?monthYear=LO"+"4"+"K20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7506"+"-K0&tradeDate="+tdate);
+        //doit("usoil_week","5K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7507"+"/OOF?monthYear=LO"+"5"+"K20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7507"+"-K0&tradeDate="+tdate);
+        //doit("usoil_week","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7503"+"/OOF?monthYear=LO"+"1"+"M20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7503"+"-M0&tradeDate="+tdate);
+        //doit("usoil_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7504"+"/OOF?monthYear=LO"+"2"+"M20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7504"+"-M0&tradeDate="+tdate);
+        //doit("usoil_week","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7505"+"/OOF?monthYear=LO"+"3"+"M20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7505"+"-M0&tradeDate="+tdate);
+        //doit("usoil_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7506"+"/OOF?monthYear=LO"+"4"+"M20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7506"+"-M0&tradeDate="+tdate);
+        doit("usoil_week","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7503"+"/OOF?monthYear=LO"+"1"+"N20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7503"+"-N0&tradeDate="+tdate);
+        doit("usoil_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7504"+"/OOF?monthYear=LO"+"2"+"N20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7504"+"-N0&tradeDate="+tdate);
+        doit("usoil_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7505"+"/OOF?monthYear=LO"+"3"+"N20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7505"+"-N0&tradeDate="+tdate);
+        doit("usoil_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//"+"7506"+"/OOF?monthYear=LO"+"4"+"N20&strategy=DEFAULT&optionProductId=7503&optionExpiration="+"7506"+"-N0&tradeDate="+tdate);
+        
+        //doit("gold_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7488/OOF?monthYear=OG"+"1"+"K20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7488-K0&tradeDate="+tdate);
+        //doit("gold_week","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7489/OOF?monthYear=OG"+"2"+"K20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7489-K0&tradeDate="+tdate);
+        //doit("gold_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7490/OOF?monthYear=OG"+"3"+"K20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7490-K0&tradeDate="+tdate);
+        //doit("gold_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7491/OOF?monthYear=OG"+"4"+"K20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7491-K0&tradeDate="+tdate);
+        //doit("gold_week","5K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7492/OOF?monthYear=OG"+"5"+"K20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7492-K0&tradeDate="+tdate);
+        //doit("gold_week","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7488/OOF?monthYear=OG"+"1"+"M20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7488-M0&tradeDate="+tdate);
+        //doit("gold_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7489/OOF?monthYear=OG"+"2"+"M20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7489-M0&tradeDate="+tdate);
+        //doit("gold_week","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7490/OOF?monthYear=OG"+"3"+"M20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7490-M0&tradeDate="+tdate);
+        //doit("gold_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7491/OOF?monthYear=OG"+"4"+"M20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7491-M0&tradeDate="+tdate);
+        doit("gold_week","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7488/OOF?monthYear=OG"+"1"+"N20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7488-N0&tradeDate="+tdate);
+        doit("gold_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7489/OOF?monthYear=OG"+"2"+"N20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7489-N0&tradeDate="+tdate);
+        doit("gold_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7490/OOF?monthYear=OG"+"3"+"N20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7490-N0&tradeDate="+tdate);
+        doit("gold_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/7491/OOF?monthYear=OG"+"4"+"N20&strategy=DEFAULT&optionProductId=7488&optionExpiration=7491-N0&tradeDate="+tdate);
+        
+        //doit("sipi_week","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2915/OOF?monthYear=EW"+"1"+"K20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2915-K0&tradeDate="+tdate);
+        //doit("sipi_week","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2916/OOF?monthYear=EW"+"2"+"K20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2916-K0&tradeDate="+tdate);
+        //doit("sipi_week","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8019/OOF?monthYear=EW"+"3"+"K20&strategy=DEFAULT&optionProductId=2915&optionExpiration=8019-K0&tradeDate="+tdate);
+        //doit("sipi_week","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//5222/OOF?monthYear=EW"+"4"+"K20&strategy=DEFAULT&optionProductId=2915&optionExpiration=5222-K0&tradeDate="+tdate);
+        //doit("sipi_week","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2915/OOF?monthYear=EW"+"1"+"M20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2915-M0&tradeDate="+tdate);
+        //doit("sipi_week","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2916/OOF?monthYear=EW"+"2"+"M20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2916-M0&tradeDate="+tdate);
+        //doit("sipi_week","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//5222/OOF?monthYear=EW"+"4"+"M20&strategy=DEFAULT&optionProductId=2915&optionExpiration=5222-M0&tradeDate="+tdate);
+        doit("sipi_week","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2915/OOF?monthYear=EW"+"1"+"N20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2915-N0&tradeDate="+tdate);
+        doit("sipi_week","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2916/OOF?monthYear=EW"+"2"+"N20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2916-N0&tradeDate="+tdate);
+        doit("sipi_week","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8019/OOF?monthYear=EW"+"3"+"N20&strategy=DEFAULT&optionProductId=2915&optionExpiration=8019-N0&tradeDate="+tdate);
+        doit("sipi_week","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//5222/OOF?monthYear=EW"+"4"+"N20&strategy=DEFAULT&optionProductId=2915&optionExpiration=5222-N0&tradeDate="+tdate);
+        doit("sipi_week","1Q",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//2915/OOF?monthYear=EW"+"1"+"Q20&strategy=DEFAULT&optionProductId=2915&optionExpiration=2915-Q0&tradeDate="+tdate);
+        doit("sipi_week","3Q",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8019/OOF?monthYear=EW"+"3"+"Q20&strategy=DEFAULT&optionProductId=2915&optionExpiration=8019-Q0&tradeDate="+tdate);
+        doit("sipi_week","3V",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8019/OOF?monthYear=EW"+"3"+"V20&strategy=DEFAULT&optionProductId=2915&optionExpiration=8019-V0&tradeDate="+tdate);
+        
+        //wedweeks
+        
+        //doit("euro_wedweek","5J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8444"+"/OOF?monthYear=WE"+"5"+"J20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8444"+"-J0&tradeDate="+tdate);
+        //doit("euro_wedweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8440"+"/OOF?monthYear=WE"+"1"+"K20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8440"+"-K0&tradeDate="+tdate);
+        //doit("euro_wedweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8441"+"/OOF?monthYear=WE"+"2"+"K20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8441"+"-K0&tradeDate="+tdate);
+        //doit("euro_wedweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8442"+"/OOF?monthYear=WE"+"3"+"K20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8442"+"-K0&tradeDate="+tdate);
+        //doit("euro_wedweek","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8443"+"/OOF?monthYear=WE"+"4"+"K20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8443"+"-K0&tradeDate="+tdate);
+        //doit("euro_wedweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8440"+"/OOF?monthYear=WE"+"1"+"M20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8440"+"-M0&tradeDate="+tdate);
+        //doit("euro_wedweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8441"+"/OOF?monthYear=WE"+"2"+"M20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8441"+"-M0&tradeDate="+tdate);
+        //doit("euro_wedweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8442"+"/OOF?monthYear=WE"+"3"+"M20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8442"+"-M0&tradeDate="+tdate);
+        //doit("euro_wedweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8443"+"/OOF?monthYear=WE"+"4"+"M20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8443"+"-M0&tradeDate="+tdate);
+        doit("euro_wedweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8440"+"/OOF?monthYear=WE"+"1"+"N20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8440"+"-N0&tradeDate="+tdate);
+        doit("euro_wedweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8441"+"/OOF?monthYear=WE"+"2"+"N20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8441"+"-N0&tradeDate="+tdate);
+        doit("euro_wedweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8442"+"/OOF?monthYear=WE"+"3"+"N20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8442"+"-N0&tradeDate="+tdate);
+        doit("euro_wedweek","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8443"+"/OOF?monthYear=WE"+"4"+"N20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8443"+"-N0&tradeDate="+tdate);
+        doit("euro_wedweek","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8444"+"/OOF?monthYear=WE"+"5"+"N20&strategy=DEFAULT&optionProductId=8440&optionExpiration="+"8444"+"-N0&tradeDate="+tdate);
+        
+        //doit("gbp_wedweek","5J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8424"+"/OOF?monthYear=WG"+"5"+"J20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8424"+"-J0&tradeDate="+tdate);
+        //doit("gbp_wedweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8420"+"/OOF?monthYear=WG"+"1"+"K20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8420"+"-K0&tradeDate="+tdate);
+        //doit("gbp_wedweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8421"+"/OOF?monthYear=WG"+"2"+"K20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8421"+"-K0&tradeDate="+tdate);
+        //doit("gbp_wedweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8422"+"/OOF?monthYear=WG"+"3"+"K20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8422"+"-K0&tradeDate="+tdate);
+        //doit("gbp_wedweek","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8423"+"/OOF?monthYear=WG"+"4"+"K20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8423"+"-K0&tradeDate="+tdate);
+        //doit("gbp_wedweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8420"+"/OOF?monthYear=WG"+"1"+"M20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8420"+"-M0&tradeDate="+tdate);
+        //doit("gbp_wedweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8421"+"/OOF?monthYear=WG"+"2"+"M20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8421"+"-M0&tradeDate="+tdate);
+        //doit("gbp_wedweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8422"+"/OOF?monthYear=WG"+"3"+"M20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8422"+"-M0&tradeDate="+tdate);
+        //doit("gbp_wedweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8423"+"/OOF?monthYear=WG"+"4"+"M20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8423"+"-M0&tradeDate="+tdate);
+        doit("gbp_wedweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8420"+"/OOF?monthYear=WG"+"1"+"N20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8420"+"-N0&tradeDate="+tdate);
+        doit("gbp_wedweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8421"+"/OOF?monthYear=WG"+"2"+"N20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8421"+"-N0&tradeDate="+tdate);
+        doit("gbp_wedweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8422"+"/OOF?monthYear=WG"+"3"+"N20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8422"+"-N0&tradeDate="+tdate);
+        doit("gbp_wedweek","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8423"+"/OOF?monthYear=WG"+"4"+"N20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8423"+"-N0&tradeDate="+tdate);
+        doit("gbp_wedweek","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8424"+"/OOF?monthYear=WG"+"5"+"N20&strategy=DEFAULT&optionProductId=8420&optionExpiration="+"8424"+"-N0&tradeDate="+tdate);
+       
+        //doit("aud_wedweek","5J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8414"+"/OOF?monthYear=WA"+"5"+"J20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8414"+"-J0&tradeDate="+tdate);
+        //doit("aud_wedweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8410"+"/OOF?monthYear=WA"+"1"+"K20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8410"+"-K0&tradeDate="+tdate);
+        //doit("aud_wedweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8411"+"/OOF?monthYear=WA"+"2"+"K20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8411"+"-K0&tradeDate="+tdate);
+        //doit("aud_wedweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8412"+"/OOF?monthYear=WA"+"3"+"K20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8412"+"-K0&tradeDate="+tdate);
+        //doit("aud_wedweek","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8413"+"/OOF?monthYear=WA"+"4"+"K20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8413"+"-K0&tradeDate="+tdate);
+        //doit("aud_wedweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8410"+"/OOF?monthYear=WA"+"1"+"M20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8410"+"-M0&tradeDate="+tdate);
+        //doit("aud_wedweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8411"+"/OOF?monthYear=WA"+"2"+"M20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8411"+"-M0&tradeDate="+tdate);
+        //doit("aud_wedweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8412"+"/OOF?monthYear=WA"+"3"+"M20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8412"+"-M0&tradeDate="+tdate);
+        //doit("aud_wedweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8413"+"/OOF?monthYear=WA"+"4"+"M20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8413"+"-M0&tradeDate="+tdate);
+        doit("aud_wedweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8410"+"/OOF?monthYear=WA"+"1"+"N20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8410"+"-N0&tradeDate="+tdate);
+        doit("aud_wedweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8411"+"/OOF?monthYear=WA"+"2"+"N20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8411"+"-N0&tradeDate="+tdate);
+        doit("aud_wedweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8412"+"/OOF?monthYear=WA"+"3"+"N20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8412"+"-N0&tradeDate="+tdate);
+        doit("aud_wedweek","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8413"+"/OOF?monthYear=WA"+"4"+"N20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8413"+"-N0&tradeDate="+tdate);
+        doit("aud_wedweek","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8414"+"/OOF?monthYear=WA"+"5"+"N20&strategy=DEFAULT&optionProductId=8410&optionExpiration="+"8414"+"-N0&tradeDate="+tdate);
+        
+        //doit("sipi_wedweek","5J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8231/OOF?monthYear=E"+"5"+"CJ20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8231-J0&tradeDate="+tdate);
+        //doit("sipi_wedweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8227/OOF?monthYear=E"+"1"+"CK20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8227-K0&tradeDate="+tdate);
+        //doit("sipi_wedweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8228/OOF?monthYear=E"+"2"+"CK20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8228-K0&tradeDate="+tdate);
+        //doit("sipi_wedweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8229/OOF?monthYear=E"+"3"+"CK20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8229-K0&tradeDate="+tdate);
+        //doit("sipi_wedweek","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8230/OOF?monthYear=E"+"4"+"CK20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8230-K0&tradeDate="+tdate);
+        //doit("sipi_wedweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8227/OOF?monthYear=E"+"1"+"CM20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8227-M0&tradeDate="+tdate);
+        //doit("sipi_wedweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8228/OOF?monthYear=E"+"2"+"CM20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8228-M0&tradeDate="+tdate);
+        //doit("sipi_wedweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8229/OOF?monthYear=E"+"3"+"CM20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8229-M0&tradeDate="+tdate);
+        //doit("sipi_wedweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8230/OOF?monthYear=E"+"4"+"CM20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8230-M0&tradeDate="+tdate);
+        doit("sipi_wedweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8227/OOF?monthYear=E"+"1"+"CN20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8227-N0&tradeDate="+tdate);
+        doit("sipi_wedweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8228/OOF?monthYear=E"+"2"+"CN20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8228-N0&tradeDate="+tdate);
+        doit("sipi_wedweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8229/OOF?monthYear=E"+"3"+"CN20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8229-N0&tradeDate="+tdate);
+        doit("sipi_wedweek","4N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8230/OOF?monthYear=E"+"4"+"CN20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8230-N0&tradeDate="+tdate);
+        doit("sipi_wedweek","5N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8231/OOF?monthYear=E"+"5"+"CN20&strategy=DEFAULT&optionProductId=8227&optionExpiration=8231-N0&tradeDate="+tdate);
+        
+        //monweeks
+        
+        
+        //doit("euro_monweek","5H",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8905"+"/OOF?monthYear=MO"+"5"+"H20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8905"+"-H0&tradeDate="+tdate);
+        //doit("euro_monweek","4J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8904"+"/OOF?monthYear=MO"+"4"+"J20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8904"+"-J0&tradeDate="+tdate);
+        //doit("euro_monweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8901"+"/OOF?monthYear=MO"+"1"+"K20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8901"+"-K0&tradeDate="+tdate);
+        //doit("euro_monweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8902"+"/OOF?monthYear=MO"+"2"+"K20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8902"+"-K0&tradeDate="+tdate);
+        //doit("euro_monweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8903"+"/OOF?monthYear=MO"+"3"+"K20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8903"+"-K0&tradeDate="+tdate);
+        doit("euro_monweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8901"+"/OOF?monthYear=MO"+"1"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8901"+"-M0&tradeDate="+tdate);
+        doit("euro_monweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8902"+"/OOF?monthYear=MO"+"2"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8902"+"-M0&tradeDate="+tdate);
+        doit("euro_monweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8903"+"/OOF?monthYear=MO"+"3"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8903"+"-M0&tradeDate="+tdate);
+        doit("euro_monweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8904"+"/OOF?monthYear=MO"+"4"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8904"+"-M0&tradeDate="+tdate);
+        doit("euro_monweek","5M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8905"+"/OOF?monthYear=MO"+"5"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8905"+"-M0&tradeDate="+tdate);
+        doit("euro_monweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8901"+"/OOF?monthYear=MO"+"1"+"N20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8901"+"-N0&tradeDate="+tdate);
+        doit("euro_monweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8902"+"/OOF?monthYear=MO"+"2"+"N20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8902"+"-N0&tradeDate="+tdate);
+        doit("euro_monweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8903"+"/OOF?monthYear=MO"+"3"+"N20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8903"+"-N0&tradeDate="+tdate);
+        doit("euro_monweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8904"+"/OOF?monthYear=MO"+"4"+"M20&strategy=DEFAULT&optionProductId=8901&optionExpiration="+"8904"+"-M0&tradeDate="+tdate);
+        
+        //doit("gbp_monweek","5H",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8895"+"/OOF?monthYear=MB"+"5"+"H20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8895"+"-H0&tradeDate="+tdate);
+        //doit("gbp_monweek","4J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8894"+"/OOF?monthYear=MB"+"4"+"J20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8894"+"-J0&tradeDate="+tdate);
+        //doit("gbp_monweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8891"+"/OOF?monthYear=MB"+"1"+"K20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8891"+"-K0&tradeDate="+tdate);
+        //doit("gbp_monweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8892"+"/OOF?monthYear=MB"+"2"+"K20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8892"+"-K0&tradeDate="+tdate);
+        //doit("gbp_monweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8893"+"/OOF?monthYear=MB"+"3"+"K20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8893"+"-K0&tradeDate="+tdate);
+        doit("gbp_monweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8891"+"/OOF?monthYear=MB"+"1"+"M20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8891"+"-M0&tradeDate="+tdate);
+        doit("gbp_monweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8892"+"/OOF?monthYear=MB"+"2"+"M20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8892"+"-M0&tradeDate="+tdate);
+        doit("gbp_monweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8893"+"/OOF?monthYear=MB"+"3"+"M20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8893"+"-M0&tradeDate="+tdate);
+        doit("gbp_monweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8894"+"/OOF?monthYear=MB"+"4"+"M20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8894"+"-M0&tradeDate="+tdate);
+        doit("gbp_monweek","5M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8895"+"/OOF?monthYear=MB"+"5"+"M20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8895"+"-M0&tradeDate="+tdate);
+        doit("gbp_monweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8891"+"/OOF?monthYear=MB"+"1"+"N20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8891"+"-N0&tradeDate="+tdate);
+        doit("gbp_monweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8892"+"/OOF?monthYear=MB"+"2"+"N20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8892"+"-N0&tradeDate="+tdate);
+        doit("gbp_monweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8893"+"/OOF?monthYear=MB"+"3"+"N20&strategy=DEFAULT&optionProductId=8891&optionExpiration="+"8893"+"-N0&tradeDate="+tdate);
+        
+        //doit("aud_monweek","5H",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8890"+"/OOF?monthYear=MA"+"5"+"H20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8890"+"-H0&tradeDate="+tdate);
+        //doit("aud_monweek","4J",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8889"+"/OOF?monthYear=MA"+"4"+"J20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8889"+"-J0&tradeDate="+tdate);
+        //doit("aud_monweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8886"+"/OOF?monthYear=MA"+"1"+"K20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8886"+"-K0&tradeDate="+tdate);
+        //doit("aud_monweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8887"+"/OOF?monthYear=MA"+"2"+"K20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8887"+"-K0&tradeDate="+tdate);
+        //doit("aud_monweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8888"+"/OOF?monthYear=MA"+"3"+"K20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8888"+"-K0&tradeDate="+tdate);
+        doit("aud_monweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8886"+"/OOF?monthYear=MA"+"1"+"M20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8886"+"-M0&tradeDate="+tdate);
+        doit("aud_monweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8887"+"/OOF?monthYear=MA"+"2"+"M20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8887"+"-M0&tradeDate="+tdate);
+        doit("aud_monweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8888"+"/OOF?monthYear=MA"+"3"+"M20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8888"+"-M0&tradeDate="+tdate);
+        doit("aud_monweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8889"+"/OOF?monthYear=MA"+"4"+"M20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8889"+"-M0&tradeDate="+tdate);
+        doit("aud_monweek","5M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8890"+"/OOF?monthYear=MA"+"5"+"M20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8890"+"-M0&tradeDate="+tdate);
+        doit("aud_monweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8886"+"/OOF?monthYear=MA"+"1"+"N20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8886"+"-N0&tradeDate="+tdate);
+        doit("aud_monweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8887"+"/OOF?monthYear=MA"+"2"+"N20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8887"+"-N0&tradeDate="+tdate);
+        doit("aud_monweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements/"+"8888"+"/OOF?monthYear=MA"+"3"+"N20&strategy=DEFAULT&optionProductId=8886&optionExpiration="+"8888"+"-N0&tradeDate="+tdate);
+        
+        //doit("sipi_monweek","5H",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8296/OOF?monthYear=E"+"5"+"AH20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8296-H0&tradeDate="+tdate);
+        //doit("sipi_monweek","1K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8292/OOF?monthYear=E"+"1"+"AK20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8292-K0&tradeDate="+tdate);
+        //doit("sipi_monweek","2K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8293/OOF?monthYear=E"+"2"+"AK20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8293-K0&tradeDate="+tdate);
+        //doit("sipi_monweek","3K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8294/OOF?monthYear=E"+"3"+"AK20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8294-K0&tradeDate="+tdate);
+        //doit("sipi_monweek","4K",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8295/OOF?monthYear=E"+"4"+"AK20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8295-K0&tradeDate="+tdate);
+        doit("sipi_monweek","1M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8292/OOF?monthYear=E"+"1"+"AM20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8292-M0&tradeDate="+tdate);
+        doit("sipi_monweek","2M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8293/OOF?monthYear=E"+"2"+"AM20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8293-M0&tradeDate="+tdate);
+        doit("sipi_monweek","3M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8294/OOF?monthYear=E"+"3"+"AM20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8294-M0&tradeDate="+tdate);
+        doit("sipi_monweek","4M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8295/OOF?monthYear=E"+"4"+"AM20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8295-M0&tradeDate="+tdate);
+        doit("sipi_monweek","5M",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8296/OOF?monthYear=E"+"5"+"AM20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8296-M0&tradeDate="+tdate);
+        doit("sipi_monweek","1N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8292/OOF?monthYear=E"+"1"+"AN20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8292-N0&tradeDate="+tdate);
+        doit("sipi_monweek","2N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8293/OOF?monthYear=E"+"2"+"AN20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8293-N0&tradeDate="+tdate);
+        doit("sipi_monweek","3N",y,tpw,"https://www.cmegroup.com/CmeWS/mvc/Settlements/Options/Settlements//8294/OOF?monthYear=E"+"3"+"AN20&strategy=DEFAULT&optionProductId=8292&optionExpiration=8294-N0&tradeDate="+tdate);
+       */ 
+    }
+    
+    public static void doit(String para, String contr, String year, String timePoint, String link) throws IOException,NumberFormatException,JsonException
+    {
+        double d = 0.0;
+        float f = (float) d;
+        
+        class settle {
+            String strike;
+            Float p_settle = f;
+            Float c_settle = f;
+            int p_interest;
+            int c_interest;
+            Float c = f;
+            Float p = f;
+            Float c_itog = f;
+            Float p_itog = f;
+        }
+        
+        out.println(link);
+        
+        List<settle> st=new ArrayList<settle>();
+        //LocalDate timePoint = LocalDateTime.now().toLocalDate();     // The current date and time
+        FileWriter writer = new FileWriter("c:\\Users\\daniels\\Documents\\from_linux\\CME\\" + para + "\\" + year + "\\" + para + "_" + "JS_" + contr + "_settle_" + timePoint + ".csv");
+        //FileWriter writer = new FileWriter("c:\\Users\\daniels\\Documents\\from_linux\\" + para + "_" + "JS_" + contr + "_settle_" + "2019-05-24" + ".csv");
+        //FileWriter writer = new FileWriter("/home/dg/" + para + "_" + "JS_" + contr + "_settle_" + "2018-11-02" + ".csv");
+        
+        String url = link;
+        
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        //add reuqest header
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36");
+        con.setRequestProperty("Host", "www.cmegroup.com");
+        con.setRequestProperty("Accept", "application/json, text/javascript, */*; q=0.01");
+        //con.setRequestProperty("Accept-Encoding", "gzip, deflate");
+        con.setRequestProperty("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4");
+        con.setRequestProperty("Connection", "keep-alive");
+        con.setRequestProperty("X-Requested-With", "XMLHttpRequest");
+        //con.setRequestProperty("Referer", "http://www.cmegroup.com/trading/fx/g10/euro-fx_quotes_globex_options.html?optionExpiration=F8");
+        con.setRequestProperty("Referer", "http://www.cmegroup.com");
+        
+        try (InputStream is = con.getInputStream();
+            JsonReader rdr = Json.createReader(is)) {
+
+            JsonObject obj1 = rdr.readObject();
+            //System.out.println("obj = " + obj1);
+            JsonArray results = obj1.getJsonArray("settlements");
+            System.out.println("results = " + results);
+            //Boolean first = false;
+            for (JsonObject result : results.getValuesAs(JsonObject.class)) {
+                
+                
+                boolean y = false;
+                
+                String strike = result.getJsonString("strike").toString();
+                strike = strike.replace("\"", "");
+                if(para.equals("jpy") || para.equals("cad") || para.equals("chf") || para.equals("jpy_week") || para.equals("jpy_wedweek") || para.equals("cad_week") || para.equals("cad_wedweek") || para.equals("chf_week"))
+                    {
+                        if(!strike.equals("Total"))
+                        {
+                            //out.println("strike = " +strike);
+                            float f_strike;
+                            if(para.equals("cad") || para.equals("chf") || para.equals("cad_week") || para.equals("cad_wedweek") || para.equals("chf_week"))
+                                f_strike = (float)10000 / Integer.parseInt(strike);
+                            else
+                                f_strike = (float)1000000 / Integer.parseInt(strike);
+                            //out.println(f_strike);
+                            strike = Float.toString(f_strike);
+                        }
+                    }
+                //System.out.print("strikePrice = " + strike);
+                
+                String type = result.getJsonString("type").toString();
+                type = type.replace("\"", "");
+                //System.out.println("type = " + type);
+                
+                for(settle s:st)
+                {
+                    if(s.strike.equals(strike))//если страйк присутствует обновляем данные
+                    {
+                        if(type.equals("Put"))
+                        {
+                            s.p_settle = pfloat(result.getJsonString("settle").toString().replace("\"", ""));
+                            s.p_interest = pint(result.getJsonString("openInterest").toString().replace("\"", ""));
+                            s.p = s.p_settle * s.p_interest;
+                        }
+                        if(type.equals("Call"))
+                        {
+                            s.c_settle = pfloat(result.getJsonString("settle").toString().replace("\"", ""));
+                            s.c_interest = pint(result.getJsonString("openInterest").toString().replace("\"", ""));
+                            s.c = s.c_settle * s.c_interest;
+                        }
+                        y = true;
+                        break;
+                    }
+                }
+                
+                if(y) continue;
+                
+                settle s = new settle();
+                
+                if(type.equals("Put"))
+                        {
+                            s.p_settle = pfloat(result.getJsonString("settle").toString().replace("\"", ""));
+                            s.p_interest = pint(result.getJsonString("openInterest").toString().replace("\"", ""));
+                            s.p = s.p_settle * s.p_interest;
+                        }
+                        if(type.equals("Call"))
+                        {
+                            s.c_settle = pfloat(result.getJsonString("settle").toString().replace("\"", ""));
+                            s.c_interest = pint(result.getJsonString("openInterest").toString().replace("\"", ""));
+                            s.c = s.c_settle * s.c_interest;
+                        }
+                        
+                s.strike = strike;
+                st.add(s);
+                
+                //просчитаем call итоги
+                
+                boolean first = true;
+                for(int i=0;i<st.size()-1;i++)
+                {
+                    if(first)
+                    {
+                        st.get(i).c_itog = st.get(i).c;
+                        first = false;
+                        continue;
+                    }
+                    if(!st.isEmpty())
+                    {
+                        try
+                        {
+                            if(st.get(i).c == null)
+                                throw new IOException("I am Exception Alpha!");
+                            //System.out.println(i);
+                            //out.println(st.get(i).c_itog);
+                            //out.println(st.get(i-1).c_itog);
+                            //out.println(st.get(i).c);
+                            //out.println(st.get(i).strike + " " + st.get(i).c_settle + " " + st.get(i).c_interest + " " + st.get(i).c + " " + st.get(i).p_settle + " " + st.get(i).p_interest + " " + st.get(i).p);
+                            st.get(i).c_itog = st.get(i).c + st.get(i-1).c_itog;
+                            //out.println("c itog after" + st.get(i).c_itog);
+                            //out.println("---------------------------------------");
+                        }catch (IOException e) {
+                            //System.out.println("Message: " + e.getMessage());
+                        }
+                    }
+                }
+                
+                        //просчитаем put итоги
+                first = true;
+                int size = st.size()-2;
+                //out.println("size = " + size);
+                for(int k=size;k>=0;k--)
+                {
+                    //out.println("ku");
+                    if(first)
+                    {
+                        st.get(k).p_itog = st.get(k).p;
+                        first = false;
+                        continue;
+                    }
+                    try
+                    {
+                        if(st.get(k+1).p_itog == null || st.get(k).p == null)
+                                throw new IOException("I am Exception Alpha!");
+                        st.get(k).p_itog = st.get(k+1).p_itog + st.get(k).p;
+                        //out.println("p itog after" + st.get(k).p_itog);
+                    }catch (IOException e) {
+                            //System.out.println("Message: " + e.getMessage());
+                        }
+                }
+            }
+            
+            for(int i=0;i<st.size();i++)
+            {
+                //out.println(st.get(i).strike + " " + st.get(i).c_settle + " " + st.get(i).c_interest + " " + st.get(i).c + " " + st.get(i).p_settle + " " + st.get(i).p_interest + " " + st.get(i).p);
+
+
+                writer.write(st.get(i).strike + " " + st.get(i).c_settle + " " + st.get(i).c_interest + " " + st.get(i).p_settle + " " + st.get(i).p_interest + " " + st.get(i).c + " " + st.get(i).p + " " + st.get(i).c_itog + " " + st.get(i).p_itog + System.getProperty("line.separator"));
+            }
+            writer.close();
+        }
+    }
+    
+    public static Float pfloat(String s)
+    {
+        Pattern p = Pattern.compile("[0-9]*\\.[0-9]+");
+        Matcher m = p.matcher(s);
+        boolean b = m.matches();
+        if (b)
+        {
+            //out.println("float sovpal");
+            return Float.parseFloat(s);
+        }
+        
+        //out.println("float ne sovpal = |" + s + "|");
+        double d = 0.00001;
+        float f = (float) d;
+        return f;
+    }
+    
+    public static int pint(String s)
+    {
+        if(s.length() <= 3)
+            return Integer.parseInt(s);
+        else
+        {
+            s = s.replaceAll(",", "");
+            //out.println("replace " + s);
+            return Integer.parseInt(s);
+        }
+        
+    }
+    
+}
