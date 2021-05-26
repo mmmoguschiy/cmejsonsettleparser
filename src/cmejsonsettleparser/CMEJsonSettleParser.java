@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author daniels
+ * @author mmmoguschiy@gmail.com
  */
 public class CMEJsonSettleParser {
 
