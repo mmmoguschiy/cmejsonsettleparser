@@ -1,4 +1,4 @@
-This is a Netbeans project that reads daily settlements reports from the CMEgroup website, presented in JSON format and adds them to separate csv files.
+This is a Netbeans project that reads daily option settlement reports from the CMEgroup website, presented in JSON format and adds them to separate csv files.
 
 Installation and launch
 
