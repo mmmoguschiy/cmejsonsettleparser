@@ -18,5 +18,10 @@ Since the program does not implement the function of creating directories, you w
 CME\euro\2021
 CME\euro\2022
 
-4) Run the project.
+4) Change the date of the reports (usually yesterday's business day) by substituting the appropriate values ​​for the day, month and year:
 
+String month = "05";
+String day = "25";
+String [] year = {"2021"};
+
+5) Run the project. 
