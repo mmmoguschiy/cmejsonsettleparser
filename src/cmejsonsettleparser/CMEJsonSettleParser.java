@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import static java.lang.System.out;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import static java.lang.System.out;
 import java.util.ArrayList;
 import java.net.URL;
@@ -506,6 +507,14 @@ public class CMEJsonSettleParser {
         //LocalDate timePoint = LocalDateTime.now().toLocalDate();     // The current date and time
         //String timePoint = year + "-" + month + "-" + day;
         ///FileWriter writer = new FileWriter("/home/daniels/CME/" + para + "/" + year + "/" + para + "_" + "JS_" + contr + "_settle_" + timePoint + ".csv");
+        try {
+            File dir = new File("c:\\Users\\daniels\\Documents\\from_linux\\CME\\" + para + "\\" + year);
+            if (!dir.exists()) {
+                 dir.mkdirs();
+            }
+        }
+        catch(Exception e){
+            System.out.println("mkdirs error: " + e.getMessage());
         FileWriter writer = new FileWriter("c:\\Users\\daniels\\Documents\\from_linux\\CME\\" + para + "\\" + year + "\\" + para + "_" + "JS_" + contr + "_settle_" + timePoint + ".csv");
         //FileWriter writer = new FileWriter("/home/daniels/CME/" + para + "/" + para + "_" + "JS_" + contr + "_settle_" + "2019-05-11" + ".csv");
         
